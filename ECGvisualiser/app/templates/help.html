@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ECG & Ternary Plot Visualizer - User Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: #007bff;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        h3 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .feature-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .feature-list li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .code-block {
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .tip {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Main Tool</a>
+        
+        <h1>ECG & Ternary Plot Visualizer - User Guide</h1>
+        
+        <div class="section">
+            <h2>Overview</h2>
+            <p>This tool provides two main functionalities:</p>
+            <ul class="feature-list">
+                <li><strong>ECG Signal Visualization:</strong> Upload and visualize WFDB format ECG files</li>
+                <li><strong>Ternary Plot Visualization:</strong> Upload CSV files and create ternary plots with customizable styles</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>ECG Signal Visualization</h2>
+            
+            <h3>Supported File Formats</h3>
+            <ul class="feature-list">
+                <li>WFDB format files (.dat, .hea, .atr)</li>
+                <li>Multiple files can be uploaded simultaneously</li>
+            </ul>
+            
+            <h3>Features</h3>
+            <ul class="feature-list">
+                <li>Interactive lead selection (All leads or individual leads)</li>
+                <li>Adjustable time window (5-60 seconds)</li>
+                <li>Adjustable start time</li>
+                <li>Real-time chart updates</li>
+                <li>Detailed ECG information display</li>
+            </ul>
+            
+            <h3>How to Use</h3>
+            <ol>
+                <li>Click "Choose Files" and select your WFDB files (.dat, .hea, .atr)</li>
+                <li>Click "Upload WFDB" to process the files</li>
+                <li>Use the controls to adjust the display:
+                    <ul>
+                        <li><strong>Select Lead:</strong> Choose specific leads or view all leads</li>
+                        <li><strong>Time Window:</strong> Adjust the time range displayed (5-60 seconds)</li>
+                        <li><strong>Start Time:</strong> Set the starting point for the display</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>Ternary Plot Visualization</h2>
+            
+            <h3>CSV File Requirements</h3>
+            <ul class="feature-list">
+                <li>Must contain exactly 5 columns</li>
+                <li>First row should be column headers</li>
+                <li>Required columns: "title" and "class" (case insensitive)</li>
+                <li>3 additional value columns with any names</li>
+            </ul>
+            
+            <div class="code-block">
+title,class,ComponentA,ComponentB,ComponentC
+Sample1,ClassA,0.3,0.4,0.3
+Sample2,ClassA,0.2,0.5,0.3
+Sample3,ClassB,0.4,0.3,0.3
+            </div>
+            
+            <h3>Features</h3>
+            <ul class="feature-list">
+                <li>Multiple CSV file upload support</li>
+                <li>Interactive data selection with checkboxes</li>
+                <li>Customizable point styles (color, shape, size)</li>
+                <li>Real-time plot updates</li>
+                <li>Automatic column name detection</li>
+            </ul>
+            
+            <h3>How to Use</h3>
+            <ol>
+                <li>Click "Choose Files" and select one or more CSV files</li>
+                <li>Click "Upload CSV" to process the files</li>
+                <li>Each file will be displayed separately with its own table and plot</li>
+                <li>Use the controls to customize the visualization:
+                    <ul>
+                        <li><strong>Checkboxes:</strong> Select/deselect data points to include in the plot</li>
+                        <li><strong>Select All/Deselect All:</strong> Quickly select or deselect all data points</li>
+                        <li><strong>Style Controls:</strong> Customize appearance for each class</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>Style Controls</h2>
+            
+            <h3>Available Options</h3>
+            <ul class="feature-list">
+                <li><strong>Color:</strong> Choose any color for each class</li>
+                <li><strong>Symbol:</strong> Select from 10 different point shapes:
+                    <ul>
+                        <li>Circle, Square, Diamond, Cross, X</li>
+                        <li>Star, Triangle Up, Triangle Down, Triangle Left, Triangle Right</li>
+                    </ul>
+                </li>
+                <li><strong>Size:</strong> Adjust point size from 4 to 20 pixels</li>
+            </ul>
+            
+            <h3>How to Customize Styles</h3>
+            <ol>
+                <li>Select a class from the dropdown menu</li>
+                <li>Adjust the color, symbol, and size for that class</li>
+                <li>Click "Apply Styles" to update the plot</li>
+                <li>Use "Reset Styles" to restore default settings</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>Tips and Best Practices</h2>
+            
+            <div class="tip">
+                <h3>💡 Tips</h3>
+                <ul class="feature-list">
+                    <li>For large datasets, use the checkboxes to focus on specific data points</li>
+                    <li>Use different colors and symbols to distinguish between classes</li>
+                    <li>The ternary plot automatically normalizes your data to percentages</li>
+                    <li>You can upload multiple CSV files to compare different datasets</li>
+                </ul>
+            </div>
+            
+            <div class="warning">
+                <h3>⚠️ Important Notes</h3>
+                <ul class="feature-list">
+                    <li>CSV files must have headers in the first row</li>
+                    <li>Column names "title" and "class" are required (case insensitive)</li>
+                    <li>Value columns should contain numeric data</li>
+                    <li>WFDB files must include both .dat and .hea files</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Troubleshooting</h2>
+            
+            <h3>Common Issues</h3>
+            <ul class="feature-list">
+                <li><strong>Upload failed:</strong> Check file format and column requirements</li>
+                <li><strong>No data displayed:</strong> Ensure CSV has correct headers and data</li>
+                <li><strong>Plot not updating:</strong> Try clicking "Apply Styles" or check data selection</li>
+                <li><strong>ECG not loading:</strong> Verify WFDB files are complete (.dat + .hea)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html> 

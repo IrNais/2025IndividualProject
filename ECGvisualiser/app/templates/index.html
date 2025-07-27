@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ECG Visualizer</title>
+    <script src="{{ url_for('static', filename='main.js') }}" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+        
+        .upload-area:hover {
+            border-color: #007bff;
+            background-color: #f0f8ff;
+        }
+        
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        table, th, td {
+            border: 1px solid #ddd;
+            border-collapse: collapse;
+            padding: 8px;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        
+        .checkbox-column {
+            width: 40px;
+            text-align: center;
+        }
+        
+        .checkbox-column input[type="checkbox"] {
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+        
+        .table-controls {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .table-controls .btn {
+            margin-right: 10px;
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+        
+        .plot-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+            position: relative;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .chart-controls {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .chart-controls label {
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        .chart-controls select, .chart-controls input {
+            margin-right: 20px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        
+        .chart-controls input[type="range"] {
+            margin-right: 50px;
+        }
+        
+        .chart-controls span {
+            margin-right: 25px;
+        }
+        
+        .header-link {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            padding: 8px 16px;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .header-link:hover {
+            background-color: #007bff;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Plotly CDN -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+        <h1 style="margin: 0; color: #333; font-size: 28px; font-weight: bold;">ECG & Ternary Plot Visualizer</h1>
+        <a href="/help" target="_blank" class="header-link">📖 User Guide</a>
+    </div>
+
+    <!-- Upper Section: WFDB File Upload and ECG Display -->
+    <div class="section">
+        <h2 class="section-title">ECG Signal Visualization</h2>
+        <div class="upload-area">
+            <h3>Upload WFDB Files</h3>
+            <p>Supports WFDB format files (.dat, .hea, .atr)</p>
+            <input type="file" id="wfdbFile" accept=".dat,.hea,.atr" multiple>
+            <button class="btn" onclick="uploadWFDB()">Upload WFDB</button>
+        </div>
+        
+        <!-- Chart Controls -->
+        <div id="chartControls" class="chart-controls" style="display: none;">
+            <label>Select Lead:</label>
+            <select id="leadSelector" onchange="updateChart()">
+                <option value="all">All Leads</option>
+            </select>
+            
+            <label>Time Window (seconds):</label>
+            <input type="range" id="timeWindow" min="5" max="60" value="10" onchange="updateChart()">
+            <span id="timeWindowValue">10</span>
+            
+            <label>Start Time (seconds):</label>
+            <input type="range" id="startTime" min="0" max="100" value="0" onchange="updateChart()">
+            <span id="startTimeValue">0</span>
+        </div>
+        
+        <div id="ecgPlotContainer" class="plot-container" style="height: 400px; display: none;">
+            <canvas id="ecgChart"></canvas>
+        </div>
+        
+        <div id="ecgInfo" style="display: none;">
+            <h4>ECG Information</h4>
+            <div id="ecgDetails"></div>
+        </div>
+    </div>
+
+    <!-- Lower Section: CSV File Upload and Ternary Plot Display -->
+    <div class="section">
+        <h2 class="section-title">Ternary Plot Visualization</h2>
+        <div class="upload-area">
+            <h3>Upload CSV Files</h3>
+            <p>CSV files must contain 5 columns: title, class, and 3 value columns (case insensitive)</p>
+            <p>First row should be column headers. 'title' and 'class' columns are required, the other 3 columns can have any names.</p>
+            <p>You can select multiple CSV files to display them separately.</p>
+            <input type="file" id="csvFile" accept=".csv" multiple>
+            <button class="btn" onclick="uploadCSV()">Upload CSV</button>
+        </div>
+
+        <!-- Main layout: multiple CSV files display -->
+        <div id="csvFilesContainer">
+            <!-- Individual CSV file displays will be generated here -->
+        </div>
+    </div>
+</body>
+</html>
