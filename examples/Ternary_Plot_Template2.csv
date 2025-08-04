@@ -1,0 +1,13 @@
+title,class,ComponentA,ComponentB,ComponentC
+Sample1,ClassA,0.3,0.4,0.3
+Sample2,ClassA,0.2,0.5,0.3
+Sample3,ClassA,0.4,0.3,0.3
+Sample4,ClassB,0.1,0.6,0.3
+Sample5,ClassB,0.2,0.4,0.4
+Sample6,ClassB,0.3,0.3,0.4
+Sample7,ClassC,0.5,0.2,0.3
+Sample8,ClassC,0.4,0.1,0.5
+Sample9,ClassC,0.6,0.2,0.2
+Sample10,ClassD,0.2,0.2,0.6
+Sample11,ClassD,0.1,0.3,0.6
+Sample12,ClassD,0.3,0.1,0.6 
