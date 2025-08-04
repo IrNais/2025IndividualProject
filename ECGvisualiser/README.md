@@ -5,7 +5,7 @@ A web-based ECG signal visualization and ternary plot analysis tool.
 ## Features
 
 ### Upper Section: ECG Signal Visualization
-- Support for uploading WFDB format files (.dat, .hea, .atr)
+- Support for uploading WFDB format files (.dat, .hea)
 - Real-time display of ECG signal waveforms
 - Multi-lead signal display
 - Interactive charts with zoom and pan capabilities
@@ -69,7 +69,7 @@ A web-based ECG signal visualization and ternary plot analysis tool.
 ### WFDB File Format
 - `.hea` file: Contains signal metadata (sampling frequency, signal names, etc.)
 - `.dat` file: Contains actual signal data
-- `.atr` file: Contains annotation information (optional)
+
 
 ### CSV File Format
 Must contain the following columns:

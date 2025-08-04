@@ -178,8 +178,14 @@
         <h2 class="section-title">ECG Signal Visualization</h2>
         <div class="upload-area">
             <h3>Upload WFDB Files</h3>
-            <p>Supports WFDB format files (.dat, .hea, .atr)</p>
-            <input type="file" id="wfdbFile" accept=".dat,.hea,.atr" multiple>
+            <p><strong>Required:</strong> You must upload both .dat and .hea files together</p>
+            <ul style="text-align: left; margin: 10px 0; padding-left: 20px;">
+                <li><strong>.dat file:</strong> Contains the actual ECG signal data</li>
+                <li><strong>.hea file:</strong> Contains header information (sampling frequency, signal names, units)</li>
+
+            </ul>
+            <p style="color: #666; font-size: 14px;">Select both .dat and .hea files from the same record (e.g., 100.dat and 100.hea)</p>
+                            <input type="file" id="wfdbFile" accept=".dat,.hea" multiple>
             <button class="btn" onclick="uploadWFDB()">Upload WFDB</button>
         </div>
         
@@ -202,7 +208,7 @@
         <div id="ecgPlotContainer" class="plot-container" style="height: 400px; display: none;">
             <canvas id="ecgChart"></canvas>
         </div>
-        
+
         <div id="ecgInfo" style="display: none;">
             <h4>ECG Information</h4>
             <div id="ecgDetails"></div>
@@ -217,6 +223,10 @@
             <p>CSV files must contain 5 columns: title, class, and 3 value columns (case insensitive)</p>
             <p>First row should be column headers. 'title' and 'class' columns are required, the other 3 columns can have any names.</p>
             <p>You can select multiple CSV files to display them separately.</p>
+            <p style="color: #007bff; font-size: 14px;">
+                📥 <a href="/download_template" download style="color: #007bff; text-decoration: none; font-weight: bold;">Download CSV Template</a> 
+                to get started with the correct format
+            </p>
             <input type="file" id="csvFile" accept=".csv" multiple>
             <button class="btn" onclick="uploadCSV()">Upload CSV</button>
         </div>

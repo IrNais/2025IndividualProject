@@ -18,7 +18,7 @@ function uploadWFDB() {
     }
 
     // Check file types
-    const validExtensions = ['.dat', '.hea', '.atr'];
+    const validExtensions = ['.dat', '.hea'];
     const selectedFiles = Array.from(files);
     console.log('Selected files:', selectedFiles.map(f => f.name));
     
@@ -27,7 +27,7 @@ function uploadWFDB() {
     );
 
     if (!hasValidFiles) {
-        alert("Please select valid WFDB files (.dat, .hea, .atr)");
+        alert("Please select valid WFDB files (.dat, .hea)");
         return;
     }
 
@@ -65,7 +65,11 @@ function uploadWFDB() {
         
         if (result.error) {
             console.error('Server returned error:', result.error);
-            plotContainer.innerHTML = `<div class="error">Server error: ${result.error}</div>`;
+            let errorMessage = result.error;
+            if (result.details) {
+                errorMessage += '<br><br><strong>Details:</strong><br>' + result.details;
+            }
+            plotContainer.innerHTML = `<div class="error">${errorMessage}</div>`;
         } else {
             console.log('Starting ECG data processing...');
             console.log('ECG data structure:', {
@@ -393,7 +397,7 @@ function displayECGInfo(ecgData) {
                 <tbody>
         `;
         
-        // 限制处理的信号数量，避免堆栈溢出
+        // Limit the number of signals processed to avoid stack overflow
         const maxSignals = Math.min(signalData.signals.length, 10);
         console.log(`Processing ${maxSignals} signals out of ${signalData.signals.length} total`);
         
@@ -406,9 +410,9 @@ function displayECGInfo(ecgData) {
                 continue;
             }
             
-            // 限制数据量以避免堆栈溢出
+            // Limit data amount to avoid stack overflow
             const data = signal.data;
-            const maxDataPoints = 10000; // 限制数据点数量
+            const maxDataPoints = 10000; // Limit number of data points
             const sampledData = data.length > maxDataPoints ? 
                 data.filter((_, i) => i % Math.ceil(data.length / maxDataPoints) === 0) : 
                 data;

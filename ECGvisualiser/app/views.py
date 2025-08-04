@@ -5,7 +5,7 @@ import tempfile
 import numpy as np
 import wfdb
 import traceback
-from flask import Blueprint, request, render_template, jsonify
+from flask import Blueprint, request, render_template, jsonify, send_file
 from .models import validate_csv, get_column_mapping
 
 blueprint = Blueprint('blue', __name__)
@@ -18,6 +18,12 @@ def index_page():
 def help_page():
     return render_template('help.html')
 
+@blueprint.route('/download_template')
+def download_template():
+    """Provide Ternary Plot CSV template file download"""
+    template_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Ternary_Plot_Template.csv')
+    return send_file(template_path, as_attachment=True, download_name='Ternary_Plot_Template.csv')
+
 @blueprint.route('/upload', methods=['POST'])
 def upload_csv():
     file = request.files.get('file')
@@ -29,7 +35,7 @@ def upload_csv():
     
     # Get column mapping
     column_mapping = get_column_mapping(reader.fieldnames)
-    
+
     # Validate CSV format
     if not validate_csv(reader.fieldnames):
         return jsonify({'error': 'CSV file must contain columns: title, class, value1, value2, value3 (case insensitive)'}), 400
@@ -69,86 +75,100 @@ def upload_wfdb():
     if not files:
         return jsonify({'error': 'No files uploaded'}), 400
     
-    # 检查是否有必要的WFDB文件
+    # Check for required WFDB files
     file_names = [f.filename for f in files]
-    print(f"上传的文件: {file_names}")  # 调试信息
+    print(f"Uploaded files: {file_names}")  # Debug info
     
     has_dat = any(f.endswith('.dat') for f in file_names)
     has_hea = any(f.endswith('.hea') for f in file_names)
     
-    print(f"包含.dat文件: {has_dat}, 包含.hea文件: {has_hea}")  # 调试信息
+    print(f"Contains .dat file: {has_dat}, Contains .hea file: {has_hea}")  # Debug info
     
-    if not (has_dat and has_hea):
-        return jsonify({'error': 'WFDB files must include both .dat and .hea files'}), 400
+    # Provide detailed error information
+    if not has_dat and not has_hea:
+        return jsonify({
+            'error': 'No WFDB files found. Please upload .dat and .hea files.',
+            'details': 'WFDB format requires both .dat (signal data) and .hea (header) files.'
+        }), 400
+    elif not has_dat:
+        return jsonify({
+            'error': 'Missing .dat file. Please upload the .dat file containing signal data.',
+            'details': 'The .dat file contains the actual ECG signal data.'
+        }), 400
+    elif not has_hea:
+        return jsonify({
+            'error': 'Missing .hea file. Please upload the .hea file containing header information.',
+            'details': 'The .hea file contains metadata like sampling frequency, signal names, and units.'
+        }), 400
     
     try:
-        # 创建临时目录保存文件
+        # Create temporary directory to save files
         with tempfile.TemporaryDirectory() as temp_dir:
-            print(f"临时目录: {temp_dir}")  # 调试信息
+            print(f"Temporary directory: {temp_dir}")  # Debug info
             
-            # 保存所有上传的文件
+            # Save all uploaded files
             for file in files:
                 if file.filename:
                     file_path = os.path.join(temp_dir, file.filename)
                     file.save(file_path)
-                    print(f"保存文件: {file_path}")  # 调试信息
+                    print(f"Saved file: {file_path}")  # Debug info
             
-            # 处理WFDB文件
+            # Process WFDB files
             ecg_data = process_wfdb_files(temp_dir)
             return jsonify(ecg_data)
     
     except Exception as e:
         error_msg = f'Error processing WFDB files: {str(e)}'
-        print(f"错误详情: {error_msg}")  # 调试信息
-        print(f"完整错误: {traceback.format_exc()}")  # 完整错误堆栈
+        print(f"Error details: {error_msg}")  # Debug info
+        print(f"Full error: {traceback.format_exc()}")  # Full error stack
         return jsonify({'error': error_msg}), 500
 
 def process_wfdb_files(temp_dir):
     """
-    处理WFDB文件并返回ECG数据
-    使用wfdb库读取真实的ECG数据
+    Process WFDB files and return ECG data
+    Use wfdb library to read real ECG data
     """
-    # 查找.dat和.hea文件
+    # Find .dat and .hea files
     dat_files = [f for f in os.listdir(temp_dir) if f.endswith('.dat')]
     hea_files = [f for f in os.listdir(temp_dir) if f.endswith('.hea')]
     
-    print(f"找到的.dat文件: {dat_files}")  # 调试信息
-    print(f"找到的.hea文件: {hea_files}")  # 调试信息
+    print(f"Found .dat files: {dat_files}")  # Debug info
+    print(f"Found .hea files: {hea_files}")  # Debug info
     
     if not dat_files or not hea_files:
         raise ValueError("Missing required WFDB files")
     
-    # 使用第一个找到的文件对
+    # Use the first found file pair
     dat_file = dat_files[0]
     hea_file = hea_files[0]
     
-    # 获取记录名称（去掉扩展名）
+    # Get record name (remove extension)
     record_name = hea_file.replace('.hea', '')
-    print(f"记录名称: {record_name}")  # 调试信息
+    print(f"Record name: {record_name}")  # Debug info
     
     try:
-        # 使用wfdb库读取记录
+        # Use wfdb library to read record
         record_path = os.path.join(temp_dir, record_name)
-        print(f"尝试读取记录: {record_path}")  # 调试信息
+        print(f"Attempting to read record: {record_path}")  # Debug info
         
         record = wfdb.rdrecord(record_path)
-        print(f"成功读取记录，信号形状: {record.p_signal.shape}")  # 调试信息
+        print(f"Successfully read record, signal shape: {record.p_signal.shape}")  # Debug info
         
-        # 获取信号数据
+        # Get signal data
         signals = record.p_signal
         signal_names = record.sig_name
         units = record.units
         sampling_frequency = record.fs
         
-        print(f"信号名称: {signal_names}")  # 调试信息
-        print(f"单位: {units}")  # 调试信息
-        print(f"采样频率: {sampling_frequency}")  # 调试信息
+        print(f"Signal names: {signal_names}")  # Debug info
+        print(f"Units: {units}")  # Debug info
+        print(f"Sampling frequency: {sampling_frequency}")  # Debug info
         
-        # 生成时间轴
+        # Generate time axis
         num_samples = signals.shape[0]
         time = np.linspace(0, num_samples / sampling_frequency, num_samples)
         
-        # 准备返回数据
+        # Prepare return data
         signal_data = []
         for i in range(signals.shape[1]):
             signal_data.append({
@@ -176,13 +196,16 @@ def process_wfdb_files(temp_dir):
         }
         
     except Exception as e:
-        # 如果wfdb库读取失败，回退到模拟数据
-        print(f"WFDB读取失败，使用模拟数据: {e}")  # 调试信息
-        print(f"WFDB错误详情: {traceback.format_exc()}")  # 完整错误堆栈
-        return generate_mock_ecg_data(record_name)
+        # WFDB reading failed, return error message to user
+        error_msg = f'Failed to read WFDB files: {str(e)}'
+        print(f"WFDB reading failed: {error_msg}")
+        return jsonify({
+            'error': 'Failed to read WFDB files. Please check your file format.',
+            'details': f'Error: {str(e)}'
+        }), 400
 
 def generate_mock_ecg_data(record_name):
-    """生成模拟的ECG数据（当真实WFDB读取失败时使用）"""
+    """Generate mock ECG data (used when real WFDB reading fails)"""
     sampling_frequency = 250  # Hz
     num_samples = 1000
     num_signals = 3
@@ -220,33 +243,33 @@ def generate_mock_ecg_data(record_name):
     }
 
 def generate_mock_ecg(time, signal_index):
-    """生成模拟的ECG信号"""
-    # 基础频率
-    base_freq = 1.2  # Hz (约50 BPM)
+    """Generate mock ECG signal"""
+    # Base frequency
+    base_freq = 1.2  # Hz (approximately 50 BPM)
     
-    # 生成基础心跳信号
+    # Generate basic heartbeat signal
     signal = np.zeros_like(time)
     
-    # 添加多个心跳周期
+    # Add multiple heartbeat cycles
     for i in range(5):
         t_offset = i / base_freq
-        # P波
+        # P wave
         p_wave = 0.1 * np.exp(-((time - t_offset - 0.1) ** 2) / 0.001)
-        # QRS复合波
+        # QRS complex
         qrs = 1.0 * np.exp(-((time - t_offset - 0.2) ** 2) / 0.0005)
-        # T波
+        # T wave
         t_wave = 0.3 * np.exp(-((time - t_offset - 0.3) ** 2) / 0.002)
         
         signal += p_wave + qrs + t_wave
     
-    # 添加一些噪声
+    # Add some noise
     noise = 0.05 * np.random.randn(len(time))
     signal += noise
     
-    # 为不同导联添加一些变化
+    # Add variations for different leads
     if signal_index == 1:
-        signal *= 0.8  # 第二个导联幅度稍小
+        signal *= 0.8  # Second lead has slightly smaller amplitude
     elif signal_index == 2:
-        signal *= 1.2  # 第三个导联幅度稍大
+        signal *= 1.2  # Third lead has slightly larger amplitude
     
     return signal
